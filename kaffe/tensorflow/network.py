@@ -79,7 +79,7 @@ class Network(object):
         assert len(args) != 0
         self.terminals = []
         for fed_layer in args:
-            if isinstance(fed_layer, basestring):
+            if isinstance(fed_layer, str):
                 try:
                     #print('Layer ' + fed_layer + ' shape')
                     #print(self.layers[fed_layer].shape)
@@ -121,6 +121,7 @@ class Network(object):
     @layer
     def attention_refinment_module_new(self, input, name, last_arm=False):
         global_pool = tf.reduce_mean(input, [1, 2], keep_dims=True)
+        print(f"input.get_shape()[3]: {input.get_shape()[3]}")
         conv_1 = keras_ly.Conv2D(input.get_shape()[3], [1, 1], padding='SAME', name=name+'_conv1')(global_pool)
         with tf.variable_scope(name+'_conv1_bn') as scope:
             conv_1_bn = slim.batch_norm(conv_1, fused=True, scope=scope)
@@ -221,7 +222,7 @@ class Network(object):
         # Convolution for a given input and kernel
         convolve = lambda i, k: tf.nn.conv2d(i, k, [1, s_h, s_w, 1], padding=padding)
         with tf.variable_scope(name) as scope:
-            kernel = self.make_var('weights', shape=[k_h, k_w, c_i / group, c_o])
+            kernel = self.make_var('weights', shape=[k_h, k_w, c_i // group, c_o])
             if group == 1:
                 # This is the common-case. Convolve the input without any further complications.
                 output = convolve(input, kernel)
@@ -263,7 +264,7 @@ class Network(object):
         # Convolution for a given input and kernel
         convolve = lambda i, k: tf.nn.atrous_conv2d(i, k, dilation, padding=padding)
         with tf.variable_scope(name) as scope:
-            kernel = self.make_var('weights', shape=[k_h, k_w, c_i / group, c_o])
+            kernel = self.make_var('weights', shape=[k_h, k_w, c_i // group, c_o])
             if group == 1:
                 # This is the common-case. Convolve the input without any further complications.
                 output = convolve(input, kernel)

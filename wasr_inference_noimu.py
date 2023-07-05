@@ -29,11 +29,11 @@ IMG_MEAN = np.array((148.8430, 171.0260, 162.4082), dtype=np.float32)
 
 SEQ_NUM = 28
 NUM_CLASSES = 3 #2
-SEQ_TXT = '/opt/workspace/host_storage_hdd/boat/inference_images_modd2_384_raw/seq%02d/seq%02d_inference.txt' #% (SEQ_NUM, SEQ_NUM)
-SAVE_DIR = '/opt/workspace/host_storage_hdd/boat/inference_images_modd2_384_raw/seq%02d/masks_arm8imu3_noimu_reprod/' #% SEQ_NUM
-DATASET_PATH = '/opt/workspace/host_storage_hdd/boat/inference_images_modd2_384_raw/'
+SEQ_TXT = 'data/images/' # seq%02d/seq%02d_inference.txt' #% (SEQ_NUM, SEQ_NUM)
+SAVE_DIR = 'new-output/no_imu/' #% SEQ_NUM
+DATASET_PATH = 'data/images/images'
 
-MODEL_WEIGHTS = 'example_weights/arm8imu3_noimu.ckpt-80000'
+MODEL_WEIGHTS = 'data/models/no_imu/arm8imu3_noimu.ckpt-80000'
 
 IMG_SIZE = [384, 512]
 
@@ -74,8 +74,14 @@ def main():
     """Create the model and start the evaluation process."""
     args = get_arguments()
 
-    args.seq_txt = args.seq_txt % (args.seq, args.seq)
-    args.save_dir = args.save_dir % (args.seq)
+    print(f"""
+          args.savedir = { args },
+          args.seq = { args.seq },
+          args.seq_txt = { args.seq_txt },
+          args.dataset_path = { args.dataset_path }
+          """)
+    args.seq_txt = f"{DATASET_PATH}/images.txt" # args.seq_txt # % (args.seq, args.seq)
+    args.save_dir = f"{args.save_dir}/{args.seq}"
 
     # Create network
     img_input = tf.placeholder(dtype=tf.uint8, shape=(IMG_SIZE[0], IMG_SIZE[1], 3))
@@ -135,7 +141,7 @@ def main():
     # Perform inferences of MODD2 dataset
     for line in f_id:
 
-        image_name, _ = line.strip('\r\n').split(' ')
+        image_name = line.strip('\r\n') # .split(' ')
 
         # read image
         img_in = cv2.imread(join(args.dataset_path, image_name))
